@@ -94,7 +94,7 @@ services:
       - ~/.cache/huggingface:/root/.cache/huggingface
     networks:
       - default
-    restart: unless-stopped
+    restart: "no"
     deploy:
       resources:
         reservations:

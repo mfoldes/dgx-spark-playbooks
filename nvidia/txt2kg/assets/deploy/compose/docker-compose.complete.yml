@@ -93,7 +93,7 @@ services:
       - CUDA_VISIBLE_DEVICES=0
     networks:
       - default
-    restart: unless-stopped
+    restart: "no"
     deploy:
       resources:
         reservations:
@@ -132,7 +132,7 @@ services:
       - ~/.cache/huggingface:/root/.cache/huggingface
     networks:
       - default
-    restart: unless-stopped
+    restart: "no"
     deploy:
       resources:
         reservations:
