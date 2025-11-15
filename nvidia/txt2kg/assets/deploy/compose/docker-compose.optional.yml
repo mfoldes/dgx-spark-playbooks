@@ -8,7 +8,7 @@ services:
       - SENTENCE_TRANSFORMER_URL=http://sentence-transformers:80
       - MODEL_NAME=all-MiniLM-L6-v2
       - VLLM_BASE_URL=http://vllm:8001/v1
-      - VLLM_MODEL=meta-llama/Llama-3.2-3B-Instruct
+      - VLLM_MODEL=nvidia/Llama-3.1-8B-Instruct-FP8
     depends_on:
       - sentence-transformers
       - vllm
@@ -30,7 +30,7 @@ services:
     ports:
       - '8001:8001'
     environment:
-      - VLLM_MODEL=meta-llama/Llama-3.2-3B-Instruct
+      - VLLM_MODEL=nvidia/Llama-3.1-8B-Instruct-FP8
       - VLLM_TENSOR_PARALLEL_SIZE=1
       - VLLM_MAX_MODEL_LEN=4096
       - VLLM_GPU_MEMORY_UTILIZATION=0.9
@@ -38,6 +38,7 @@ services:
       - VLLM_KV_CACHE_DTYPE=fp8
       - VLLM_PORT=8001
       - VLLM_HOST=0.0.0.0
+      - HF_TOKEN=${HF_TOKEN}
     volumes:
       - vllm_models:/app/models
       - /tmp:/tmp

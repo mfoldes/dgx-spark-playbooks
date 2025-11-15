@@ -54,6 +54,22 @@ NVFP4_MODEL="nvidia/Llama-3.3-70B-Instruct-FP4"
 NVFP8_MODEL="nvidia/Llama-3.1-8B-Instruct-FP8"
 STANDARD_MODEL="meta-llama/Llama-3.1-70B-Instruct"
 
+# Helper to consistently apply the lightweight FP8 8B override that keeps DGX Spark stable.
+apply_lightweight_model_override() {
+    local context="$1"
+    if [[ -n "$context" ]]; then
+        echo "$context"
+    fi
+    echo "Overriding configuration: forcing nvidia/Llama-3.1-8B-Instruct-FP8 to reduce DGX Spark memory pressure"
+    QUANTIZATION_FLAG=""
+    MODEL_TO_USE="$NVFP8_MODEL"
+    GPU_MEMORY_UTIL="0.85"
+    MAX_MODEL_LEN="8192"
+    MAX_NUM_SEQS="64"
+    MAX_BATCHED_TOKENS="8192"
+    CPU_OFFLOAD_GB="12"
+}
+
 # Check GPU compute capability for optimal quantization
 COMPUTE_CAPABILITY=$(nvidia-smi -i 0 --query-gpu=compute_cap --format=csv,noheader,nounits 2>/dev/null || echo "unknown")
 echo "Detected GPU compute capability: $COMPUTE_CAPABILITY"
@@ -61,34 +77,40 @@ echo "Detected GPU compute capability: $COMPUTE_CAPABILITY"
 # Configure quantization based on GPU architecture
 if [[ "$COMPUTE_CAPABILITY" == "12.1" ]] || [[ "$COMPUTE_CAPABILITY" == "10.0" ]]; then
     # Blackwell/DGX Spark architecture - use standard 70B model with CPU offloading
-    echo "Using standard Llama-3.1-70B model for Blackwell/DGX Spark with CPU offloading"
-    QUANTIZATION_FLAG=""
-    MODEL_TO_USE="$STANDARD_MODEL"  # Use standard 70B model
-    GPU_MEMORY_UTIL="0.7"  # Lower GPU memory to allow unified memory
-    MAX_MODEL_LEN="4096"   # Shorter sequences for memory efficiency
-    MAX_NUM_SEQS="16"      # Lower concurrent sequences for 70B
-    MAX_BATCHED_TOKENS="4096"
-    CPU_OFFLOAD_GB="50"    # Offload 50GB to CPU/unified memory
+    # echo "Using standard Llama-3.1-70B model for Blackwell/DGX Spark with CPU offloading"
+    # QUANTIZATION_FLAG=""
+    # MODEL_TO_USE="$STANDARD_MODEL"  # Use standard 70B model
+    # GPU_MEMORY_UTIL="0.7"  # Lower GPU memory to allow unified memory
+    # MAX_MODEL_LEN="4096"   # Shorter sequences for memory efficiency
+    # MAX_NUM_SEQS="16"      # Lower concurrent sequences for 70B
+    # MAX_BATCHED_TOKENS="4096"
+    # CPU_OFFLOAD_GB="50"    # Offload 50GB to CPU/unified memory
+
+    apply_lightweight_model_override "Blackwell/DGX Spark detected (compute capability $COMPUTE_CAPABILITY)"
 elif [[ "$COMPUTE_CAPABILITY" == "9.0" ]]; then
     # Hopper architecture - use standard model
-    echo "Using standard 70B model for Hopper architecture"
-    QUANTIZATION_FLAG=""
-    MODEL_TO_USE="$STANDARD_MODEL"
-    GPU_MEMORY_UTIL="0.7"
-    MAX_MODEL_LEN="4096"
-    MAX_NUM_SEQS="16"
-    MAX_BATCHED_TOKENS="4096"
-    CPU_OFFLOAD_GB="40"
+    # echo "Using standard 70B model for Hopper architecture"
+    # QUANTIZATION_FLAG=""
+    # MODEL_TO_USE="$STANDARD_MODEL"
+    # GPU_MEMORY_UTIL="0.7"
+    # MAX_MODEL_LEN="4096"
+    # MAX_NUM_SEQS="16"
+    # MAX_BATCHED_TOKENS="4096"
+    # CPU_OFFLOAD_GB="40"
+
+    apply_lightweight_model_override "Hopper architecture detected (compute capability $COMPUTE_CAPABILITY)"
 else
     # Other architectures - use standard precision
-    echo "Using standard 70B model for GPU architecture: $COMPUTE_CAPABILITY"
-    QUANTIZATION_FLAG=""
-    MODEL_TO_USE="$STANDARD_MODEL"
-    GPU_MEMORY_UTIL="0.7"
-    MAX_MODEL_LEN="2048"
-    MAX_NUM_SEQS="16"
-    MAX_BATCHED_TOKENS="2048"
-    CPU_OFFLOAD_GB="40"
+    # echo "Using standard 70B model for GPU architecture: $COMPUTE_CAPABILITY"
+    # QUANTIZATION_FLAG=""
+    # MODEL_TO_USE="$STANDARD_MODEL"
+    # GPU_MEMORY_UTIL="0.7"
+    # MAX_MODEL_LEN="2048"
+    # MAX_NUM_SEQS="16"
+    # MAX_BATCHED_TOKENS="2048"
+    # CPU_OFFLOAD_GB="40"
+
+    apply_lightweight_model_override "Generic architecture detected (compute capability $COMPUTE_CAPABILITY)"
 fi
 
 echo "Using model: $MODEL_TO_USE"
