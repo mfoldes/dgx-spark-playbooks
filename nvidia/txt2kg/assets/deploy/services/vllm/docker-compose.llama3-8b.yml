@@ -61,7 +61,7 @@ services:
               count: 1
               capabilities: [gpu]
     
-    restart: unless-stopped
+    restart: "no"
     
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8001/v1/models"]
@@ -88,6 +88,7 @@ services:
       - ./benchmark_results:/app/results
     networks:
       - vllm-network
+    restart: "no"
     profiles:
       - benchmark  # Only start when explicitly requested
 

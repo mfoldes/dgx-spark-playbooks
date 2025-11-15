@@ -8,7 +8,7 @@ services:
     environment:
       - ARANGODB_URL=http://arangodb:8529
       - ARANGODB_DB=txt2kg
-      - PINECONE_HOST=entity-embeddings
+      - PINECONE_HOST=thedangerzone.sr5business.com
       - PINECONE_PORT=5081
       - PINECONE_API_KEY=pclocal
       - PINECONE_ENVIRONMENT=local
@@ -28,13 +28,12 @@ services:
       - HTTP_TIMEOUT=1800000
       - REQUEST_TIMEOUT=1800000
     networks:
-      - pinecone-net
       - default
       - txt2kg-network
+    restart: "no"
     depends_on:
       - arangodb
       - ollama
-      - entity-embeddings
       - sentence-transformers
       - vllm
 
@@ -47,13 +46,14 @@ services:
     volumes:
       - arangodb_data:/var/lib/arangodb3
       - arangodb_apps_data:/var/lib/arangodb3-apps
+    restart: "no"
 
   arangodb-init:
     image: arangodb:latest
     depends_on:
       arangodb:
         condition: service_started
-    restart: on-failure
+    restart: "no"
     entrypoint: >
       sh -c "
         echo 'Waiting for ArangoDB to start...' &&
@@ -61,23 +61,6 @@ services:
         echo 'Creating txt2kg database...' &&
         arangosh --server.endpoint tcp://arangodb:8529 --server.authentication false --javascript.execute-string 'try { db._createDatabase(\"txt2kg\"); console.log(\"Database txt2kg created successfully!\"); } catch(e) { if(e.message.includes(\"duplicate\")) { console.log(\"Database txt2kg already exists\"); } else { throw e; } }'
       "
-
-  entity-embeddings:
-    image: ghcr.io/pinecone-io/pinecone-index:latest
-    container_name: entity-embeddings
-    environment:
-      PORT: 5081
-      INDEX_TYPE: serverless
-      VECTOR_TYPE: dense
-      DIMENSION: 384
-      METRIC: cosine
-      INDEX_NAME: entity-embeddings
-    ports:
-      - "5081:5081"
-    platform: linux/amd64
-    networks:
-      - pinecone-net
-    restart: unless-stopped
 
   sentence-transformers:
     build:
@@ -89,6 +72,7 @@ services:
       - MODEL_NAME=all-MiniLM-L6-v2
     networks:
       - default
+    restart: "no"
 
   ollama:
     build:
@@ -113,7 +97,7 @@ services:
       - CUDA_VISIBLE_DEVICES=0
     networks:
       - default
-    restart: unless-stopped
+    restart: "no"
     deploy:
       resources:
         reservations:
@@ -152,7 +136,7 @@ services:
       - ~/.cache/huggingface:/root/.cache/huggingface
     networks:
       - default
-    restart: unless-stopped
+    restart: "no"
     deploy:
       resources:
         reservations:
@@ -174,8 +158,6 @@ volumes:
   vllm_models:
 
 networks:
-  pinecone-net:
-    name: pinecone
   default:
     driver: bridge
   txt2kg-network:

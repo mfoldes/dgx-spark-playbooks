@@ -3,13 +3,11 @@ version: '3.8'
 services:
   trtllm:
     image: nvcr.io/nvidia/tensorrt-llm/release:1.0.0rc3
+    restart: "no"
     deploy:
       replicas: 2
       restart_policy:
-        condition: any
-        delay: 5s
-        max_attempts: 3
-        window: 120s
+        condition: none
       resources:
         reservations:
           generic_resources:

@@ -22,6 +22,7 @@ services:
     networks:
       - default
       - txt2kg-network
+    restart: "no"
     depends_on:
       - arangodb
       - ollama
@@ -34,12 +35,13 @@ services:
     volumes:
       - arangodb_data:/var/lib/arangodb3
       - arangodb_apps_data:/var/lib/arangodb3-apps
+    restart: "no"
   arangodb-init:
     image: arangodb:latest
     depends_on:
       arangodb:
         condition: service_started
-    restart: on-failure
+    restart: "no"
     entrypoint: >
       sh -c "
         echo 'Waiting for ArangoDB to start...' &&
@@ -70,7 +72,7 @@ services:
       - CUDA_VISIBLE_DEVICES=0            # Use GPU 0 (change to 'all' for multi-GPU)
     networks:
       - default
-    restart: unless-stopped
+    restart: "no"
     deploy:
       resources:
         reservations:

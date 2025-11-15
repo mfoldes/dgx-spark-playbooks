@@ -25,7 +25,7 @@ services:
     image: nvcr.io/nvidia/tensorrt-llm/release:spark-single-gpu-dev
     container_name: qwen2.5-vl
     shm_size: '1g'
-    restart: unless-stopped
+    restart: "no"
     deploy:
       resources:
         reservations:
@@ -58,6 +58,7 @@ services:
     container_name: qwen3-embedding
     volumes:
       - ./models:/models
+    restart: "no"
     deploy:
       resources:
         reservations:
@@ -107,6 +108,7 @@ services:
     container_name: gpt-oss-120b
     volumes:
       - ./models:/models
+    restart: "no"
     deploy:
       resources:
         reservations:
@@ -132,6 +134,7 @@ services:
     container_name: deepseek-coder
     volumes:
       - ./models:/models
+    restart: "no"
     deploy:
       resources:
         reservations:
