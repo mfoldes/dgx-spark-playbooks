@@ -1,7 +1,7 @@
 services:
   app:
     environment:
-      - PINECONE_HOST=entity-embeddings
+      - PINECONE_HOST=thedangerzone.sr5business.com
       - PINECONE_PORT=5081
       - PINECONE_API_KEY=pclocal
       - PINECONE_ENVIRONMENT=local
@@ -9,28 +9,9 @@ services:
       - MODEL_NAME=all-MiniLM-L6-v2
       - VLLM_BASE_URL=http://vllm:8001/v1
       - VLLM_MODEL=meta-llama/Llama-3.2-3B-Instruct
-    networks:
-      - pinecone-net
     depends_on:
-      - entity-embeddings
       - sentence-transformers
       - vllm
-  entity-embeddings:
-    image: ghcr.io/pinecone-io/pinecone-index:latest
-    container_name: entity-embeddings
-    environment:
-      PORT: 5081
-      INDEX_TYPE: serverless
-      VECTOR_TYPE: dense
-      DIMENSION: 384
-      METRIC: cosine
-      INDEX_NAME: entity-embeddings
-    ports:
-      - "5081:5081"
-    platform: linux/amd64
-    networks:
-      - pinecone-net
-    restart: unless-stopped
   sentence-transformers:
     build:
       context: ../../deploy/services/sentence-transformers
@@ -79,8 +60,4 @@ services:
 
 volumes:
   vllm_models:
-
-networks:
-  pinecone-net:
-    name: pinecone
 
