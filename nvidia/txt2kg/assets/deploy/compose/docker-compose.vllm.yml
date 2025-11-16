@@ -80,7 +80,7 @@ services:
       - VLLM_MODEL=meta-llama/Llama-3.2-3B-Instruct
       - VLLM_TENSOR_PARALLEL_SIZE=1
       - VLLM_MAX_MODEL_LEN=12384 #Increase maximum tokens to 12384
-      - VLLM_GPU_MEMORY_UTILIZATION=0.70
+      - VLLM_GPU_MEMORY_UTILIZATION=0.72
       # NVfp4 quantization settings
       - VLLM_QUANTIZATION=fp8
       - VLLM_KV_CACHE_DTYPE=fp8
