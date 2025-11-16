@@ -8,6 +8,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 COMPOSE_DIR="$SCRIPT_DIR/deploy/compose"
 STACK_MODE="both"
 REMOVE_IMAGES=true
+REMOVE_VOLUMES=true
 
 usage() {
   cat <<'EOF'
@@ -18,6 +19,7 @@ Options:
   --complete       Tear down only the complete stack (docker-compose.complete.yml)
   --both           Tear down both stacks (default)
   --keep-images    Do not remove images built by Docker Compose
+  --keep-volumes   Do not remove volumes created by Docker Compose
   --help, -h       Show this help message
 
 This script stops running services, removes containers, networks, volumes,
@@ -42,6 +44,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --keep-images)
       REMOVE_IMAGES=false
+      shift
+      ;;
+    --keep-volumes)
+      REMOVE_VOLUMES=false
       shift
       ;;
     --help|-h)
@@ -89,7 +95,10 @@ teardown_stack() {
   echo ""
   echo "Stopping $stack_name stack defined in $(basename "$compose_file")..."
 
-  local cmd=("${DOCKER_COMPOSE_CMD[@]}" -f "$compose_file" down --volumes --remove-orphans)
+  local cmd=("${DOCKER_COMPOSE_CMD[@]}" -f "$compose_file" down --remove-orphans)
+  if [[ "$REMOVE_VOLUMES" == true ]]; then
+    cmd+=(--volumes)
+  fi
   if [[ "$REMOVE_IMAGES" == true ]]; then
     cmd+=(--rmi local)
   fi
