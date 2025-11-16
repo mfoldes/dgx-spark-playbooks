@@ -91,6 +91,9 @@ services:
       - CUDA_VISIBLE_DEVICES=0
       - NCCL_DEBUG=INFO
       - VLLM_ATTENTION_BACKEND=FLASHINFER
+      - HF_TOKEN=${HF_TOKEN:?Set HF_TOKEN in your environment to access gated Hugging Face models}
+      - HUGGING_FACE_HUB_TOKEN=${HF_TOKEN}
+      - HUGGINGFACEHUB_API_TOKEN=${HF_TOKEN}
     volumes:
       - vllm_models:/app/models
       - /tmp:/tmp

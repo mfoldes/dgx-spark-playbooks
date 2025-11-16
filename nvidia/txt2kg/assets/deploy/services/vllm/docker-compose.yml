@@ -11,7 +11,9 @@ services:
     environment:
       - VLLM_ATTENTION_BACKEND=FLASHINFER
       # HuggingFace configuration
-      - HF_TOKEN=${HF_TOKEN}
+      - HF_TOKEN=${HF_TOKEN:?Set HF_TOKEN in your environment to access gated Hugging Face models}
+      - HUGGING_FACE_HUB_TOKEN=${HF_TOKEN}
+      - HUGGINGFACEHUB_API_TOKEN=${HF_TOKEN}
       - HF_HOME=/app/models/.cache
     volumes:
       # Cache HuggingFace models locally

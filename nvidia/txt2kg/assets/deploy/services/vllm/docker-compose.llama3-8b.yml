@@ -29,6 +29,9 @@ services:
       - NCCL_DEBUG=INFO
       
       # Hugging Face settings
+      - HF_TOKEN=${HF_TOKEN:?Set HF_TOKEN in your environment to access gated Hugging Face models}
+      - HUGGING_FACE_HUB_TOKEN=${HF_TOKEN}
+      - HUGGINGFACEHUB_API_TOKEN=${HF_TOKEN}
       - HF_HOME=/app/.cache/huggingface
       - TRANSFORMERS_CACHE=/app/.cache/huggingface/transformers
     

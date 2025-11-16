@@ -41,6 +41,9 @@ services:
       - VLLM_PORT=8001
       - VLLM_HOST=0.0.0.0
       - VLLM_ATTENTION_BACKEND=FLASHINFER
+      - HF_TOKEN=${HF_TOKEN:?Set HF_TOKEN in your environment to access gated Hugging Face models}
+      - HUGGING_FACE_HUB_TOKEN=${HF_TOKEN}
+      - HUGGINGFACEHUB_API_TOKEN=${HF_TOKEN}
     volumes:
       - vllm_models:/app/models
       - /tmp:/tmp
