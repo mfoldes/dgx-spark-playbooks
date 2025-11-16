@@ -90,6 +90,7 @@ services:
       # Performance tuning
       - CUDA_VISIBLE_DEVICES=0
       - NCCL_DEBUG=INFO
+      - VLLM_ATTENTION_BACKEND=FLASHINFER
     volumes:
       - vllm_models:/app/models
       - /tmp:/tmp

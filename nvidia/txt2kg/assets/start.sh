@@ -2,9 +2,13 @@
 
 # Setup script for txt2kg project
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+COMPOSE_DIR="$SCRIPT_DIR/deploy/compose"
+
 # Parse command line arguments
 DEV_FRONTEND=false
 USE_COMPLETE=false
+FOLLOW_LOGS=false
 
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -16,12 +20,17 @@ while [[ $# -gt 0 ]]; do
       USE_COMPLETE=true
       shift
       ;;
+    --logs)
+      FOLLOW_LOGS=true
+      shift
+      ;;
     --help|-h)
       echo "Usage: ./start.sh [OPTIONS]"
       echo ""
       echo "Options:"
       echo "  --dev-frontend    Run frontend in development mode (without Docker)"
       echo "  --complete        Use complete stack (vLLM, Pinecone, Sentence Transformers)"
+      echo "  --logs            Follow Docker Compose logs after startup"
       echo "  --help, -h        Show this help message"
       echo ""
       echo "Default: Starts minimal stack with Ollama, ArangoDB, and Next.js frontend"
@@ -29,6 +38,7 @@ while [[ $# -gt 0 ]]; do
       echo "Examples:"
       echo "  ./start.sh                # Start minimal demo (recommended)"
       echo "  ./start.sh --complete     # Start with all optional services"
+      echo "  ./start.sh --logs         # Start stack and follow logs"
       exit 0
       ;;
     *)
@@ -80,19 +90,30 @@ fi
 
 # Build the docker-compose command
 if [ "$USE_COMPLETE" = true ]; then
-  CMD="$DOCKER_COMPOSE_CMD -f $(pwd)/deploy/compose/docker-compose.complete.yml"
+  COMPOSE_FILE="$COMPOSE_DIR/docker-compose.complete.yml"
   echo "Using complete stack (Ollama, vLLM, Pinecone, Sentence Transformers)..."
 else
-  CMD="$DOCKER_COMPOSE_CMD -f $(pwd)/deploy/compose/docker-compose.yml"
+  COMPOSE_FILE="$COMPOSE_DIR/docker-compose.yml"
   echo "Using minimal configuration (Ollama + ArangoDB only)..."
 fi
 
 # Execute the command
 echo ""
 echo "Starting services..."
-echo "Running: $CMD up -d"
-cd $(dirname "$0")
-eval "$CMD up -d"
+echo "Running: $DOCKER_COMPOSE_CMD -f $COMPOSE_FILE up -d"
+cd "$SCRIPT_DIR"
+$DOCKER_COMPOSE_CMD -f "$COMPOSE_FILE" up -d
+
+if [ "$FOLLOW_LOGS" = true ]; then
+  echo ""
+  echo "Following Docker Compose logs (press Ctrl+C to exit)..."
+  if cd "$COMPOSE_DIR"; then
+    $DOCKER_COMPOSE_CMD logs -f
+  else
+    echo "Error: unable to change directory to $COMPOSE_DIR"
+    exit 1
+  fi
+fi
 
 echo ""
 echo "=========================================="
@@ -123,5 +144,5 @@ echo ""
 echo "Other options:"
 echo "  • Run frontend in dev mode: ./start.sh --dev-frontend"
 echo "  • Use complete stack: ./start.sh --complete"
-echo "  • View logs: docker compose logs -f"
+echo "  • Follow logs automatically: ./start.sh --logs"
 echo "" 

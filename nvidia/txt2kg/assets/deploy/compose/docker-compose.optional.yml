@@ -40,6 +40,7 @@ services:
       - VLLM_KV_CACHE_DTYPE=fp8
       - VLLM_PORT=8001
       - VLLM_HOST=0.0.0.0
+      - VLLM_ATTENTION_BACKEND=FLASHINFER
     volumes:
       - vllm_models:/app/models
       - /tmp:/tmp
