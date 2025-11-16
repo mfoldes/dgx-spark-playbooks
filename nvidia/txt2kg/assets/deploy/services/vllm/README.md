@@ -46,6 +46,34 @@ curl -X POST "http://localhost:8001/v1/chat/completions" \
   }'
 ```
 
+### Manual Launch (without Compose)
+
+If you want to run the container directly (for example on a single GPU dev box), you can rely on the bundled `launch_server.sh` script, which mirrors the upstream vLLM guidance for running the OpenAI-compatible server:
+
+```bash
+docker run --rm --gpus all -p 8001:8001 \
+  -e VLLM_MODEL=meta-llama/Llama-3.2-3B-Instruct \
+  -e VLLM_QUANTIZATION=fp8 \
+  -v ~/.cache/huggingface:/root/.cache/huggingface \
+  txt2kg-vllm:latest
+```
+
+Inside the container the script executes the documented entrypoint:
+
+```bash
+python -m vllm.entrypoints.openai.api_server \
+  --model "$VLLM_MODEL" \
+  --host "$VLLM_HOST" \
+  --port "$VLLM_PORT" \
+  --tensor-parallel-size "$VLLM_TENSOR_PARALLEL_SIZE" \
+  --max-model-len "$VLLM_MAX_MODEL_LEN" \
+  --max-num-seqs "$VLLM_MAX_NUM_SEQS" \
+  --max-num-batched-tokens "$VLLM_MAX_NUM_BATCHED_TOKENS" \
+  --gpu-memory-utilization "$VLLM_GPU_MEMORY_UTILIZATION" \
+  --kv-cache-dtype "$VLLM_KV_CACHE_DTYPE" \
+  --trust-remote-code
+```
+
 ## Default Configuration
 
 - **Model**: `meta-llama/Llama-3.2-3B-Instruct`
@@ -63,6 +91,9 @@ Environment variables configured in `docker-compose.complete.yml`:
 - `VLLM_GPU_MEMORY_UTILIZATION`: GPU memory usage (default: 0.9)
 - `VLLM_QUANTIZATION`: Quantization method (default: fp8)
 - `VLLM_KV_CACHE_DTYPE`: KV cache data type (default: fp8)
+- `VLLM_MAX_NUM_SEQS`: Maximum concurrent requests (default: 64)
+- `VLLM_MAX_NUM_BATCHED_TOKENS`: Maximum tokens handled per batch (default: 4096)
+- `VLLM_HOST` / `VLLM_PORT`: Network binding for the OpenAI API server (default: `0.0.0.0:8001`)
 
 ## Frontend Integration
 
@@ -126,6 +157,10 @@ docker exec vllm-service nvidia-smi
 - Ensure sufficient VRAM for the model
 - Check HuggingFace cache: `ls ~/.cache/huggingface/hub`
 - For gated models, set HF_TOKEN environment variable
+
+- Confirm the container picked up the expected environment variables by checking the startup log (the script prints every option before launching the server).
+- The server binds to `VLLM_HOST:VLLM_PORT`, so firewalls or different hostnames can block health probes.
+- HuggingFace downloads are cached under `/root/.cache/huggingface`; ensure that volume is writable when running outside of Docker Compose.
 
 ## Comparison with Ollama
 

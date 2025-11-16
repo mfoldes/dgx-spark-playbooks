@@ -9,10 +9,10 @@ services:
     ports:
       - "8001:8001"
     environment:
+      - VLLM_ATTENTION_BACKEND=FLASHINFER
       # HuggingFace configuration
       - HF_TOKEN=${HF_TOKEN}
       - HF_HOME=/app/models/.cache
-      
     volumes:
       # Cache HuggingFace models locally
       - ./models:/app/models
