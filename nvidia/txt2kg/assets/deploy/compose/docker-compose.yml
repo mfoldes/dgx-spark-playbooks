@@ -8,7 +8,7 @@ services:
     environment:
       - ARANGODB_URL=http://arangodb:8529
       - ARANGODB_DB=txt2kg
-      - LANGCHAIN_TRACING_V2=true
+      - LANGCHAIN_TRACING_V2=false
       - GRPC_SSL_CIPHER_SUITES=HIGH+ECDSA:HIGH+aRSA
       - NODE_TLS_REJECT_UNAUTHORIZED=0
       - OLLAMA_BASE_URL=http://ollama:11434/v1

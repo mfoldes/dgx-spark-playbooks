@@ -16,7 +16,7 @@ services:
       - PINECONE_PORT=5081
       - PINECONE_API_KEY=pclocal
       - PINECONE_ENVIRONMENT=local
-      - LANGCHAIN_TRACING_V2=true
+      - LANGCHAIN_TRACING_V2=false
       - SENTENCE_TRANSFORMER_URL=http://sentence-transformers:80
       - MODEL_NAME=all-MiniLM-L6-v2
       - GRPC_SSL_CIPHER_SUITES=HIGH+ECDSA:HIGH+aRSA
